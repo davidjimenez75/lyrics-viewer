@@ -18,6 +18,7 @@ This is optional, must is helpful to point and click unknow word or phrases.
 [Google Dictionary (by Google)](https://chrome.google.com/webstore/detail/google-dictionary-by-goog/mgijmajocgfcbeboacabfgobmjgjcoja)
 
  - Right click > Configuration
+ 
  - [x] Display pop-up when I double-click a word       - Trigger key: [None]
  - [x] Display pop-up when I select a word or phrase   - Trigger key: [Ctrl]
  - [x] Store words I look up, including definitions
@@ -55,7 +56,7 @@ http://localhost
 
 #### How can I create my own lyrics files?
 
-Create a *.txt file with same name of the song por video.
+Create a *.txt file with same name of the song or video.
 
 The file must be encoded with UTF-8 (use Notepad++) 
 
