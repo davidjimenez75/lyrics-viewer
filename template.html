@@ -285,7 +285,12 @@ function checkKey(e) {
  	
 	 e = e || window.event;
 
-	if (e.keyCode == '38') {
+	if (e.keyCode == '19') {
+		// PAUSE
+		// console.log("PAUSE");
+		togglePlay();               // PAUSE KEY => PLAY/PAUSE
+	}
+	else if (e.keyCode == '38') {
 		// up arrow
 		// console.log("up");
 	}
@@ -303,10 +308,10 @@ function checkKey(e) {
 		// right arrow
 		// console.log("right");
 
-	}else if (e.keyCode == '32') {
+	}
+	else if (e.keyCode == '32') {
 		// SPACE
 		// console.log("SPACE");
-		togglePlay();               // SPACE  -> PLAY/PAUSE
 	}
 }
 </script>

@@ -6,7 +6,7 @@
  * 
  * @category   Music
  * @package    Lyrics
- * @version    $Rev: 33 $
+ * @version    $Rev: 37 $
  * @license    GPL
  *
  * 
