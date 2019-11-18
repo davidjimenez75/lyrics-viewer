@@ -6,7 +6,7 @@
  * 
  * @category   Music
  * @package    Lyrics
- * @version    $Rev: 37 $
+ * @version    $Rev: 41 $
  * @license    GPL
  *
  * 
@@ -147,11 +147,11 @@ function getLyrics()
     }
 
 
-    $flv_template = file_get_contents("template.html");
-    $flv_template = str_replace("__flv_video__", $video_str, $flv_template);
-    $flv_template = str_replace("__flv_videos__", $videos_str, $flv_template);
-    $flv_template = str_replace("__TITLE__", substr(
-    strrchr(@$_GET["video"], "//"),1,-4), $flv_template);
+    $template = file_get_contents("template.html");
+    $template = str_replace("__flv_video__", $video_str, $template);
+    $template = str_replace("__flv_videos__", $videos_str, $template);
+    $template = str_replace("__TITLE__", substr(
+    strrchr(@$_GET["video"], "//"),1,-4), $template);
 
 
     // existe ficheros lyrics?
@@ -178,7 +178,7 @@ function getLyrics()
 
         $lyrics = substr_replace("<h4>" . $lyrics . "</h5>", "</h4><h5>", strpos("<h1>" . $lyrics, "\r\n"), 4);
         
-        $flv_template = str_replace("__lyrics__", "<div class='lyrics'>" . nl2br($lyrics) . "</div>", $flv_template);
+        
         
     }
     // sino creamos el fichero con solo el titulo del mp3
@@ -201,7 +201,10 @@ function getLyrics()
         //BUG: Solucionado creo - creacion de .txt nada mas cargar el script
         if ((isset($_GET["video"])) && ($_GET["video"] != "")) {
             $this->crea_lyrics(substr($_GET["video"], 0, -4) . ".txt", "$cancion\r\n\r\n");
+        }elseif ((isset($_GET["audio"])) && ($_GET["audio"] != "")) {
+            $this->crea_lyrics(substr($_GET["audio"], 0, -4) . ".txt", "$cancion\r\n\r\n");
         }
+
         // si no hay parametros no crees el .txt
 
 
@@ -215,16 +218,45 @@ function getLyrics()
         $cancion = str_replace("\'", "", $cancion);
         $cancion = str_replace("_", "+", $cancion);
 
-        if ((isset($_GET["video"])) || (isset($_GET["mp3"]))) {
+        if ((isset($_GET["video"])) || (isset($_GET["audio"]))) {
             $cancion = "<a href='http://www.google.com/search?client=opera&rls=es-es&q=$cancion&sourceid=opera&ie=utf-8&oe=utf-8' target='_blank'>$search_lyrics_str</a>";
-            $flv_template = str_replace(
+            $template = str_replace(
                 "__lyrics__",
                 "<div class='lyrics'>$cancion</div><br>",
-                $flv_template
+                $template
             ); // no mostrar nada al cargar
         }
-        $flv_template = str_replace("__lyrics__", "", $flv_template);
+        $lyrics="";
+
     }
+
+
+
+    //TODO: HIGHLIGHT WORDS SEARCHED BEFORE IN GOOGLE DICTIONARY
+    if (isset($_GET["audio"])) {
+        $csvfile=substr($_GET["audio"], 0, -3)."csv";
+        if (file_exists($csvfile)) {
+            //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
+            $handle = fopen($csvfile, "r");
+            while (($data = fgetcsv($handle,0,"\t")) !== FALSE) {
+                $lyrics=str_ireplace($data[2],'<a href="#" title="'.$data[3].'" class="highlighted">'.$data[2].'</a>',$lyrics);
+           }
+        }
+    }elseif (isset($_GET["video"])) {
+        $csvfile=substr($_GET["video"], 0, -3)."csv";
+        if (file_exists($csvfile)) {
+            //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
+            $handle = fopen($csvfile, "r");
+            while (($data = fgetcsv($handle,0,"\t")) !== FALSE) {
+                $lyrics=str_ireplace($data[2],'<a href="#" title="'.$data[3].'" class="highlighted">'.$data[2].'</a>',$lyrics);
+           }
+        }
+    }
+
+    // FINAL REPLACEMENT
+    $template = str_replace("__lyrics__", "<div class='lyrics'>" . nl2br($lyrics) . "</div>", $template);
+    $template = str_replace("__lyrics__", "", $template);
+
 
     // MODIFICACIONES FINALES
     //$flv_template = str_replace("?", "'", $flv_template);
@@ -232,7 +264,7 @@ function getLyrics()
 
     // RESULTADOS POR PANTALLA
     //echo utf8_decode($flv_template); //BUG: Removed problems with spanish folders
-    echo $flv_template;
+    echo $template;
 
     if ($this->debug) {
         echo "<pre>";
@@ -253,7 +285,8 @@ function recorre_dir($a_videos, &$videos_str)
     //while (list($key, $data) = each($a_videos))
     foreach ($a_videos as $key => $data) {
 
-        if ((isset($data["kind"])) && ($data["kind"] == "dir")) {
+        if ((isset($data["kind"])) && ($data["kind"] == "dir")) 
+        {
             $videos_str .= "\r\n";
             $videos_str .= "<h3><a href='index.php?dir=" . $data["path"] . "'>";
             for ($i = 1; $i < $data["level"]; $i++)
@@ -262,6 +295,7 @@ function recorre_dir($a_videos, &$videos_str)
             $videos_str .= $data["name"] . "</a></h3>\n";
             // salto de linea en cambio de directorio
             $videos_str = $this->recorre_dir($data["content"], $videos_str);
+
         } else {
 
 
@@ -278,11 +312,17 @@ function recorre_dir($a_videos, &$videos_str)
                     if ($this->debug)
                         $videos_str .= " (" . filesize($descripcion) . " bytes)";
                     if (filesize($descripcion) < $this->minSizeLyricFile) {
-                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='flv_lyrics_no'> - [lyrics]</a>";
+                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='flv_lyrics_no'> - Subtitles</a>";
                     } else {
-                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='flv_lyrics_yes'> - [lyrics]</a>";
+                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='flv_lyrics_yes'> - Subtitles</a>";
                     }
+                }    
+                // CSV WITH WORDS?
+                $csv_file=substr($data["path"], 0, -3) . "csv";
+                if (file_exists($csv_file)){
+                    $videos_str .= "<a href=\"$csv_file\" target=\"_blank\" class='csv'> - (csv)</a>";
                 }
+
                 $videos_str .= "<br>\r\n";
             }
 
@@ -301,15 +341,25 @@ function recorre_dir($a_videos, &$videos_str)
                     if ($this->debug)
                         $videos_str .= " (" . filesize($descripcion) . " bytes)";
                     if (filesize($descripcion) < $this->minSizeLyricFile) {
-                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='mp3_lyrics_no'> - [lyrics]</a>";
+                        $videos_str .= " <a href=\"$descripcion\" target=\"_blank\" class='mp3_lyrics_no'> - Lyrics</a>";
                     } else {
-                        $videos_str .= "<a href=\"$descripcion\" target=\"_blank\" class='mp3_lyrics_yes'> - [lyrics]</a>";
+                        $videos_str .= " <a href=\"$descripcion\" target=\"_blank\" class='mp3_lyrics_yes'> - Lyrics</a>";
                     }
+                }
+                // CSV WITH WORDS?
+                $csv_file=substr($data["path"], 0, -3) . "csv";
+                if (file_exists($csv_file)){
+                    $videos_str .= " <a href=\"$csv_file\" target=\"_blank\" class='csv'> - (csv)</a>";
                 }
 
                 $videos_str .= "<br>\r\n";
             }
+
+
         }
+
+
+
     }
     return ($videos_str);
 }
@@ -327,7 +377,7 @@ function recur_dir($dir)
 
     $dirlist = opendir($dir);
     while ($file = readdir($dirlist)) {
-        if ($file != '.' && $file != '..' && $file != '.svn') {
+        if ($file != '.' && $file != '..' && $file != '.svn' && $file != '.git') {
             $newpath = $dir . '/' . $file;
             $level = explode('/', $newpath);
             if (is_dir($newpath)) {
