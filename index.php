@@ -301,7 +301,7 @@ function recorre_dir($a_videos, &$videos_str)
 
             //TODO: VIDEOS-FLV
             //TODO: Change to a external validation extension function
-            if ((strtolower(substr($data["name"], -3)) == "flv") || (strtolower(substr($data["name"],-3)) == "mp4")  || (strtolower(substr($data["name"],-3)) == "avi") ) {
+            if ((strtolower(substr($data["name"], -3)) == "flv") || (strtolower(substr($data["name"],-3)) == "mp4")  || (strtolower(substr($data["name"],-3)) == "avi")  || (strtolower(substr($data["name"],-4)) == "webm") ) {
 
                 for ($i = 1; $i < $data["level"]; $i++)
                     $videos_str .= ""; // REMOVED OLD 2 SPACES &nbsp;
