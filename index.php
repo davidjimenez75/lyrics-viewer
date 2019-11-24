@@ -158,32 +158,10 @@ function getLyrics()
     strrchr(@$_GET["video"], "//"),1,-4), $template);
 
 
-    // existe ficheros lyrics?
-    if ((file_exists(substr(@$_GET["video"], 0, -3) . "txt")) || (file_exists(substr(@$_GET["audio"], 0, -3) . "txt"))) 
+    // IS A TXT FILE WITH LYRICS OR SUBTITLES?
+    if ((file_exists(substr(@$_GET["video"], 0, -3) . "txt")) || (file_exists(substr(@$_GET["audio"], 0, -3) . "txt"))  || (file_exists(substr(@$_GET["video"], 0, -4) . "txt")) || (file_exists(substr(@$_GET["audio"], 0, -4) . "txt"))     ) 
     {
-        if (isset($_GET["video"])) {
-            $lyrics = file_get_contents(substr($_GET["video"], 0, -3) . "txt");
-        } elseif (isset($_GET["audio"])) {
-            $lyrics = file_get_contents(substr($_GET["audio"], 0, -3) . "txt");
-            //$lyrics =str_replace("%20"," ",$lyrics);
-        }else{
-            $lyrics = "";
-        }
-
-        //$lyrics="<h3>".$lyrics."</h3>";
-
-        
-        // procesamiento lyrics
-        $lyrics = str_replace("<file>", "", $lyrics);
-        $lyrics = str_replace("</file>", "", $lyrics);
-
-        //$lyrics = htmlentities($lyrics);//BUG: peta y no sale nada de las letras.
-        $lyrics = str_replace("�", "'", $lyrics);
-
-        $lyrics = substr_replace("<h4>" . $lyrics . "</h5>", "</h4><h5>", strpos("<h1>" . $lyrics, "\r\n"), 4);
-        
-        
-        
+        $lyrics=$this->processLyrics();      
     }
     // sino creamos el fichero con solo el titulo del mp3
     else {
@@ -249,7 +227,12 @@ function getLyrics()
 
     // HIGHLIGHT WORDS SEARCHED BEFORE IN GOOGLE DICTIONARY
     if (isset($_GET["audio"])) {
-        $csvfile=substr($_GET["audio"], 0, -3)."csv"; //TODO: 4 letters extensions
+        if (file_exists(substr($_GET["audio"], 0, -4)."csv"))
+        {
+            $csvfile=substr($_GET["audio"], 0, -4)."csv";
+        }else{
+            $csvfile=substr($_GET["audio"], 0, -3)."csv";
+        }
         if (file_exists($csvfile)) {
             //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
             $handle = fopen($csvfile, "r");
@@ -258,7 +241,12 @@ function getLyrics()
            }
         }
     }elseif (isset($_GET["video"])) {
-        $csvfile=substr($_GET["video"], 0, -3)."csv"; //TODO: 4 letters extensions
+        if (file_exists(substr($_GET["video"], 0, -4)."csv"))
+        {
+            $csvfile=substr($_GET["video"], 0, -4)."csv";
+        }else{
+            $csvfile=substr($_GET["video"], 0, -3)."csv";
+        }
         if (file_exists($csvfile)) {
             //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
             $handle = fopen($csvfile, "r");
@@ -434,12 +422,57 @@ function crea_lyrics($fichero, $texto)
     //BUG: SOLUCIONADO quitando las contrabarras de texto y nombre fichero :? - Falla con los simbolos ingleses ej; can't, men's, etc...
     $fichero = str_replace("\\", "", $fichero);
     $texto = str_replace("\\", "", $texto);
-    if ($desc = fopen($fichero, "w")) {
-        fputs($desc, $texto);
-        fclose($desc);
-        //if (file_exists($fichero))	echo "Archivo ".$fichero." creado";
+    // just create the txt file if not exists
+    if (!file_exists($fichero))
+    {
+        if ($desc = fopen($fichero, "w")) {
+            fputs($desc, $texto);
+            fclose($desc);
+            //if (file_exists($fichero))	echo "Archivo ".$fichero." creado";
+        }
     }
 }
+
+
+function processLyrics(){
+        
+    if (isset($_GET["video"])) {
+        if (file_exists(substr($_GET["video"], 0, -4) . "txt"))
+        {
+            $lyrics = file_get_contents(substr($_GET["video"], 0, -4) . "txt");
+        }else{
+            $lyrics = file_get_contents(substr($_GET["video"], 0, -3) . "txt");
+        }
+    } elseif (isset($_GET["audio"])) {
+        if (file_exists(substr($_GET["audio"], 0, -4) . "txt"))
+        {
+            $lyrics = file_get_contents(substr($_GET["audio"], 0, -4) . "txt");
+        }else{
+            $lyrics = file_get_contents(substr($_GET["audio"], 0, -3) . "txt");
+        }
+        //$lyrics =str_replace("%20"," ",$lyrics);
+    } else {
+        $lyrics = "";
+    }
+
+    //$lyrics="<h3>".$lyrics."</h3>";
+
+    
+    // procesamiento lyrics
+    $lyrics = str_replace("<file>", "", $lyrics);
+    $lyrics = str_replace("</file>", "", $lyrics);
+
+    // colors from subtitles
+    $lyrics = str_replace("#CCCCCC", "#222222", $lyrics);
+    $lyrics = str_replace("#E5E5E5", "#222222", $lyrics);
+
+    //$lyrics = htmlentities($lyrics);//BUG: peta y no sale nada de las letras.
+    $lyrics = str_replace("�", "'", $lyrics);
+
+    $lyrics = substr_replace("<h4>" . $lyrics . "</h5>", "</h4><h5>", strpos("<h1>" . $lyrics, "\r\n"), 4);
+
+    return $lyrics;
 }
 
 
+}
