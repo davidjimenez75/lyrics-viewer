@@ -32,7 +32,7 @@ class Lyrics
     var $mod_array = [];
 
     var $audio_tpl = '<center><audio controls autoplay id="audio"><source src="__mp3__" type="audio/mpeg"></center>';
-    var $video_tpl = '<center><video src="__video__" type="video/mp4" autoplay repeat=true controls allowFullScreen=true width=728>__video__</video></center>';
+    var $video_tpl = '<center><video src="__video__" type="video/mp4" autoplay repeat=true controls allowFullScreen=true width=728 id="audio">__video__</video></center>';
 
 /**
  * 
