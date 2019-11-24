@@ -114,6 +114,10 @@ function getLyrics()
                     // VIDEO - AVI
                     $videos_str .= "\n<a href=\"index.php?video=" . $data["path"] . "&dir=" . $data["folder"] .
                         "&autoplay=true\" class='avi'>" . $data["name"] . "</a><br>\r\n"; // nada del raiz sale
+                } elseif (strtolower($data["extension"]) == "webm") {
+                    // VIDEO - WEBM
+                    $videos_str .= "\n<a href=\"index.php?video=" . $data["path"] . "&dir=" . $data["folder"] .
+                        "&autoplay=true\" class='webm'>" . $data["name"] . "</a><br>\r\n"; // nada del raiz sale
                 } elseif (strtolower($data["extension"]) == "flac") {
                     // AUDIO - FLAC
                     $videos_str .= "\n<a href=\"index.php?audio=" . $data["path"] . "&dir=" . $data["folder"] .
@@ -198,11 +202,22 @@ function getLyrics()
         }
 
 
-        //BUG: Solucionado creo - creacion de .txt nada mas cargar el script
+        //TODO: BUG Solucionado creo - creacion de .txt nada mas cargar el script
         if ((isset($_GET["video"])) && ($_GET["video"] != "")) {
-            $this->crea_lyrics(substr($_GET["video"], 0, -4) . ".txt", "$cancion\r\n\r\n");
+            if (strtolower(substr($_GET["video"], -4))=="webm")
+            {
+                $this->crea_lyrics(substr($_GET["video"], 0, -5) . ".txt", "$cancion\r\n\r\n");
+            }else{
+                $this->crea_lyrics(substr($_GET["video"], 0, -4) . ".txt", "$cancion\r\n\r\n");
+            }
+            
         }elseif ((isset($_GET["audio"])) && ($_GET["audio"] != "")) {
-            $this->crea_lyrics(substr($_GET["audio"], 0, -4) . ".txt", "$cancion\r\n\r\n");
+            if (strtolower(substr($_GET["audio"], -4))=="flac")
+            {
+                $this->crea_lyrics(substr($_GET["audio"], 0, -5) . ".txt", "$cancion\r\n\r\n");
+            }else{
+                $this->crea_lyrics(substr($_GET["audio"], 0, -4) . ".txt", "$cancion\r\n\r\n");
+            }
         }
 
         // si no hay parametros no crees el .txt
@@ -232,9 +247,9 @@ function getLyrics()
 
 
 
-    //TODO: HIGHLIGHT WORDS SEARCHED BEFORE IN GOOGLE DICTIONARY
+    // HIGHLIGHT WORDS SEARCHED BEFORE IN GOOGLE DICTIONARY
     if (isset($_GET["audio"])) {
-        $csvfile=substr($_GET["audio"], 0, -3)."csv";
+        $csvfile=substr($_GET["audio"], 0, -3)."csv"; //TODO: 4 letters extensions
         if (file_exists($csvfile)) {
             //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
             $handle = fopen($csvfile, "r");
@@ -243,7 +258,7 @@ function getLyrics()
            }
         }
     }elseif (isset($_GET["video"])) {
-        $csvfile=substr($_GET["video"], 0, -3)."csv";
+        $csvfile=substr($_GET["video"], 0, -3)."csv"; //TODO: 4 letters extensions
         if (file_exists($csvfile)) {
             //$lyrics=strtolower($lyrics);//TODO: Google dictionary only works on lower letters
             $handle = fopen($csvfile, "r");
@@ -299,7 +314,7 @@ function recorre_dir($a_videos, &$videos_str)
         } else {
 
 
-            //TODO: VIDEOS-FLV
+            // VIDEO FILES
             //TODO: Change to a external validation extension function
             if ((strtolower(substr($data["name"], -3)) == "flv") || (strtolower(substr($data["name"],-3)) == "mp4")  || (strtolower(substr($data["name"],-3)) == "avi")  || (strtolower(substr($data["name"],-4)) == "webm") ) {
 
@@ -307,7 +322,14 @@ function recorre_dir($a_videos, &$videos_str)
                     $videos_str .= ""; // REMOVED OLD 2 SPACES &nbsp;
                 $videos_str .= "\n<a href=\"index.php?video=" . $data["path"] . "&dir=" . $data["folder"] .
                     "\" class='flv'>" . $data["name"] . "</a>";
-                $descripcion = substr($data["path"], 0, -3) . "txt";
+                if (strtolower(substr($data["path"], -4))=="webm")
+                {
+                    $descripcion = substr($data["path"], 0, -4) . "txt";
+                    $csv_file=substr($data["path"], 0, -4) . "csv";                    
+                }else{   
+                    $descripcion = substr($data["path"], 0, -3) . "txt";
+                    $csv_file=substr($data["path"], 0, -3) . "csv";
+                }
                 if (file_exists($descripcion)) {
                     if ($this->debug)
                         $videos_str .= " (" . filesize($descripcion) . " bytes)";
@@ -318,7 +340,6 @@ function recorre_dir($a_videos, &$videos_str)
                     }
                 }    
                 // CSV WITH WORDS?
-                $csv_file=substr($data["path"], 0, -3) . "csv";
                 if (file_exists($csv_file)){
                     $videos_str .= "<a href=\"$csv_file\" target=\"_blank\" class='csv'> - (csv)</a>";
                 }
@@ -327,7 +348,7 @@ function recorre_dir($a_videos, &$videos_str)
             }
 
 
-            //TODO: SONGS-MP3
+            // AUDIO FILES
             if ( (strtolower(substr($data["name"], -3)) == "mp3") || (strtolower(substr($data["name"],-3)) == "wav") || (strtolower(substr($data["name"],-3)) == "ogg")  || (strtolower(substr($data["name"],-4)) == "flac") ) {
 
                 for ($i = 1; $i < $data["level"]; $i++)
@@ -335,7 +356,15 @@ function recorre_dir($a_videos, &$videos_str)
                 // Si estamos listando un subdirectorio
                 $videos_str .= "\n<a href=\"index.php?audio=" . $data["path"] . "&dir=" . $data["folder"] .
                     "\" class='audio'>" . $data["name"] . "</a>";
-                $descripcion = substr($data["path"], 0, -3) . "txt";
+                    if (strtolower(substr($data["path"], -4))=="flac")
+                    {
+                        $descripcion = substr($data["path"], 0, -4) . "txt";
+                        $csv_file = substr($data["path"], 0, -4) . "csv";
+                    }else{   
+                        $descripcion = substr($data["path"], 0, -3) . "txt";
+                        $csv_file = substr($data["path"], 0, -3) . "csv";
+                    }
+                        
                 if (file_exists($descripcion)) {
 
                     if ($this->debug)
@@ -347,7 +376,6 @@ function recorre_dir($a_videos, &$videos_str)
                     }
                 }
                 // CSV WITH WORDS?
-                $csv_file=substr($data["path"], 0, -3) . "csv";
                 if (file_exists($csv_file)){
                     $videos_str .= " <a href=\"$csv_file\" target=\"_blank\" class='csv'> - (csv)</a>";
                 }
