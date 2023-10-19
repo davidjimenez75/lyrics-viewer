@@ -6,7 +6,7 @@
  * 
  * @category   Music
  * @package    Lyrics
- * @version    $Rev: 41 $
+ * @version    2023.10.19
  * @license    GPL
  *
  * 
@@ -154,17 +154,26 @@ function getLyrics()
     $template = file_get_contents("template.html");
     $template = str_replace("__flv_video__", $video_str, $template);
     $template = str_replace("__flv_videos__", $videos_str, $template);
-    $template = str_replace("__TITLE__", substr(
-    strrchr(@$_GET["video"], "//"),1,-4), $template);
+    if (isset($_GET["video"])){
+        $template = str_replace("__TITLE__", substr(strrchr($_GET["video"], "//"),1,-4), $template);
+    }
 
 
     // IS A TXT FILE WITH LYRICS OR SUBTITLES?
-    if ((file_exists(substr(@$_GET["video"], 0, -3) . "txt")) || (file_exists(substr(@$_GET["audio"], 0, -3) . "txt"))  || (file_exists(substr(@$_GET["video"], 0, -4) . "txt")) || (file_exists(substr(@$_GET["audio"], 0, -4) . "txt"))     ) 
-    {
-        $lyrics=$this->processLyrics();      
-    }
+    if (isset($_GET["video"])){
+        if ((file_exists(substr($_GET["video"], 0, -3) . "txt")) || (file_exists(substr($_GET["audio"], 0, -3) . "txt"))  || (file_exists(substr($_GET["video"], 0, -4) . "txt")) || (file_exists(substr($_GET["audio"], 0, -4) . "txt"))     ) 
+        {
+            $lyrics=$this->processLyrics();      
+        }
+
+
     // sino creamos el fichero con solo el titulo del mp3
-    else {
+    }elseif (isset($_GET["audio"])){
+        if ((file_exists(substr($_GET["audio"], 0, -3) . "txt")) || (file_exists(substr($_GET["audio"], 0, -4) . "txt"))) 
+        {
+            $lyrics=$this->processLyrics();      
+        }
+    } else {
 
         if (isset($_GET["video"]))
         {
