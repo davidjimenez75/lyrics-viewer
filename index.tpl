@@ -147,7 +147,7 @@ etiqueta {
 /* Directorios */
 h1 {
 	font-family: Arial, Helvetica, sans-serif;
-	font-size:1.3em;
+	font-size:1.7em;
 	color:#0099FF;
 	padding: 0.1em;
 }
@@ -244,6 +244,7 @@ audio {
     -ms-user-select: none;
     user-select: none;
     outline: none;
+	width:100%;
 }
 
 .highlighted{
@@ -273,7 +274,7 @@ small {
 </head>
 <body>
 
-<center><div id="logo"><h1><a href="index.php">lyrics-viewer<a/></h1></div></center>
+<center><div id="logo"><h1><a href="index.php">__TITLE__<a/></h1></div></center>
 __flv_video__
 <br style="clear:both;">
 __flv_videos__

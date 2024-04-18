@@ -162,7 +162,19 @@ function getLyrics()
     $template = file_get_contents("index.tpl");
     $template = str_replace("__flv_video__", $video_str, $template);
     $template = str_replace("__flv_videos__", $videos_str, $template);
-    $template = str_replace("__TITLE__", "lyrics-viewer", $template);
+    if (isset($_GET["audio"]))
+    {
+        $template = str_replace("__TITLE__", pathinfo($_GET["audio"],PATHINFO_FILENAME), $template);
+    }elseif (isset($_GET["video"]))
+    {
+        $template = str_replace("__TITLE__", pathinfo($_GET["video"],PATHINFO_FILENAME), $template);
+    }elseif (isset($_GET["dir"]))
+    {
+        $template = str_replace("__TITLE__", pathinfo($_GET["dir"],PATHINFO_FILENAME), $template);
+    }else{
+        $template = str_replace("__TITLE__", "lyrics-viewer", $template);
+    }
+
 
 
     // IS A TXT FILE WITH LYRICS OR SUBTITLES?
@@ -175,13 +187,13 @@ function getLyrics()
 
         if (isset($_GET["video"]))
         {
-            $cancion = substr(strrchr($_GET["video"], "//"), 1, -4);
+            $cancion = pathinfo($_GET["video"],PATHINFO_FILENAME);
         }elseif (isset($_GET["mp3"])) 
         {
-            $cancion = substr(strrchr($_GET["audio"], "//"), 1, -4);
+            $cancion = pathinfo($_GET["audio"],PATHINFO_FILENAME);
         }elseif (isset($_GET["dir"])) 
         {
-            $cancion = substr(strrchr($_GET["dir"], "//"), 1, -4);
+            $cancion = pathinfo($_GET["dir"],PATHINFO_FILENAME);
         }else{
             $cancion = "lyrics";
         }
@@ -208,7 +220,7 @@ function getLyrics()
         // si no hay parametros no crees el .txt
 
 
-        $cancion = " lyrics " .$cancion;
+        $cancion = $cancion. "+lyrics";
         if (is_numeric(substr($cancion, 1, 1))) {
             $cancion = substr($cancion, 2);
         }
@@ -227,8 +239,8 @@ function getLyrics()
             ); // no mostrar nada al cargar
         }
         $lyrics="";
-
     }
+
 
 
 
@@ -266,6 +278,10 @@ function getLyrics()
     // FINAL REPLACEMENT
     $template = str_replace("__lyrics__", "<div class='lyrics'>" . nl2br($lyrics) . "</div>", $template);
     $template = str_replace("__lyrics__", "", $template);
+    /*
+    $template = str_replace("__TITLE__", $data[3], $template);
+    $template = str_replace("lyrics+lyrics", "lyrics-viewer", $template);
+    */
 
 
     // MODIFICACIONES FINALES
