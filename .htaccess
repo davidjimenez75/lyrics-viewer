@@ -1,0 +1,5 @@
+AddType audio/x-m4a .m4a
+AddType audio/mp4a-latm .m4b
+AddType audio/mp4a-latm .m4p
+AddType video/mp4 .mp4
+AddType video/x-m4v .m4v 

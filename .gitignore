@@ -1,20 +1,21 @@
-vendor/
-node_modules/
-npm-debug.log
+00Favoritos
 
-# Laravel 4 specific
-bootstrap/compiled.php
-app/storage/
+en_audio
+en_music
+en_video
 
-# Laravel 5 & Lumen specific
-public/storage
-public/hot
-storage/*.key
-.env.*.php
-.env.php
-.env
-Homestead.yaml
-Homestead.json
+es_audio
+es_music
+es_video
 
-# Rocketeer PHP task runner and deployment package. https://github.com/rocketeers/rocketeer
-.rocketeer/
+eu_audio
+eu_music
+eu_video
+
+fr_audio
+fr_music
+fr_video
+
+ru_audio
+ru_music
+ru_video

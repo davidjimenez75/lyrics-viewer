@@ -1,0 +1,2 @@
+ - 2007-11-23 Fails with some english chars mainly (')
+ - 2007-11-04 Creates a void file at loading

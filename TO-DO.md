@@ -1,0 +1,10 @@
+ - 2009-12-16;MP4 - Soporte mp4 en firefox (ahora solo funciona en chrome)
+ - 2007-11-23;Ocultar del primer listado los ficheros, dejar solo dirs?
+ - 2007-11-23;Fails with some english chars mainly (')
+ - 2007-11-04;Ver portadas de los discos on mouse over
+ - 2007-11-04;Pinchar sobre disco y se expande la capa
+ - 2007-11-04;Modo visulizacion de portadas en pequeño, pinchables
+ - 2007-11-04;Creates a void file at loading
+ - 2007-11-03;Unificar todo en un solo fichero .PHP que funcione mediante una unica clase
+ - 2007-06-16;Convertir los discos en desplegables?
+ - 2007-06-16;Buscador de grupos y canciones? ficheros mp3's

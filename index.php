@@ -6,7 +6,7 @@
  * 
  * @category   Music
  * @package    Lyrics
- * @version    2023.10.19
+ * @version    2024.04.18
  * @license    GPL
  *
  * 
@@ -130,6 +130,14 @@ function getLyrics()
                     // AUDIO - WAV
                     $videos_str .= "\n<a href=\"index.php?audio=" . $data["path"] . "&dir=" . $data["folder"] .
                         "&autoplay=true\" class='wav'>" . $data["name"] . "</a><br>\r\n"; // nada del raiz sale
+                } elseif (strtolower($data["extension"]) == "aac") {
+                    // AUDIO - AAC
+                    $videos_str .= "\n<a href=\"index.php?audio=" . $data["path"] . "&dir=" . $data["folder"] .
+                        "&autoplay=true\" class='aac'>" . $data["name"] . "</a><br>\r\n"; // nada del raiz sale
+                } elseif (strtolower($data["extension"]) == "m4a") {
+                    // AUDIO - M4A
+                    $videos_str .= "\n<a href=\"index.php?audio=" . $data["path"] . "&dir=" . $data["folder"] .
+                        "&autoplay=true\" class='m4a'>" . $data["name"] . "</a><br>\r\n"; // nada del raiz sale
                 }else {
                     // resto extensiones ignoradas
                 }
@@ -151,29 +159,19 @@ function getLyrics()
     }
 
 
-    $template = file_get_contents("template.html");
+    $template = file_get_contents("index.tpl");
     $template = str_replace("__flv_video__", $video_str, $template);
     $template = str_replace("__flv_videos__", $videos_str, $template);
-    if (isset($_GET["video"])){
-        $template = str_replace("__TITLE__", substr(strrchr($_GET["video"], "//"),1,-4), $template);
-    }
+    $template = str_replace("__TITLE__", "lyrics-viewer", $template);
 
 
     // IS A TXT FILE WITH LYRICS OR SUBTITLES?
-    if (isset($_GET["video"])){
-        if ((file_exists(substr($_GET["video"], 0, -3) . "txt")) || (file_exists(substr($_GET["audio"], 0, -3) . "txt"))  || (file_exists(substr($_GET["video"], 0, -4) . "txt")) || (file_exists(substr($_GET["audio"], 0, -4) . "txt"))     ) 
-        {
-            $lyrics=$this->processLyrics();      
-        }
-
-
+    if ((@file_exists(substr(@$_GET["video"], 0, -3) . "txt")) || (@file_exists(substr(@$_GET["audio"], 0, -3) . "txt"))  || (@file_exists(substr(@$_GET["video"], 0, -4) . "txt")) || (@file_exists(substr(@$_GET["audio"], 0, -4) . "txt"))     ) 
+    {
+        $lyrics=$this->processLyrics();      
+    }
     // sino creamos el fichero con solo el titulo del mp3
-    }elseif (isset($_GET["audio"])){
-        if ((file_exists(substr($_GET["audio"], 0, -3) . "txt")) || (file_exists(substr($_GET["audio"], 0, -4) . "txt"))) 
-        {
-            $lyrics=$this->processLyrics();      
-        }
-    } else {
+    else {
 
         if (isset($_GET["video"]))
         {
@@ -346,7 +344,7 @@ function recorre_dir($a_videos, &$videos_str)
 
 
             // AUDIO FILES
-            if ( (strtolower(substr($data["name"], -3)) == "mp3") || (strtolower(substr($data["name"],-3)) == "wav") || (strtolower(substr($data["name"],-3)) == "ogg")  || (strtolower(substr($data["name"],-4)) == "flac") ) {
+            if ( (strtolower(substr($data["name"], -3)) == "mp3") || (strtolower(substr($data["name"],-3)) == "wav") || (strtolower(substr($data["name"],-3)) == "ogg")  || (strtolower(substr($data["name"],-3)) == "m4a")  || (strtolower(substr($data["name"],-4)) == "flac") ) {
 
                 for ($i = 1; $i < $data["level"]; $i++)
                     $videos_str .= ""; // REMOVED OLD 2 SPACES &nbsp;
@@ -393,7 +391,6 @@ function recorre_dir($a_videos, &$videos_str)
 function recur_dir($dir)
 {
     $mod_array=array();
-    //        $web_root = '.';
     if (isset($_GET["dir"])) {
         $web_root = $_GET["dir"];
     } else {
@@ -401,34 +398,41 @@ function recur_dir($dir)
     }
 
     $dirlist = opendir($dir);
+    $files = array();
     while ($file = readdir($dirlist)) {
         if ($file != '.' && $file != '..' && $file != '.svn' && $file != '.git') {
-            $newpath = $dir . '/' . $file;
-            $level = explode('/', $newpath);
-            if (is_dir($newpath)) {
-                $mod_array[] = array('level' => count($level) - 1, 'path' => $newpath, 'name' =>
-                end($level), 'kind' => 'dir', 'mod_time' => filemtime($newpath), 'content' => $this->recur_dir($newpath));
-            } else {
-                // Añadido folder como la ruta hasta el fichero desde el dir base
-                // quitado url (solo quitaba el ultimo punto :? - quizas para missing imagenes?
-
-                $mod_array[] = array(
-                    'level' => count($level) - 1, 'path' => $newpath, 'folder' =>
-                    substr($newpath, 0, strrpos($newpath, "/") + 1), 'name' => end($level), 'kind' =>
-                    'file', 'extension' => substr(end($level), strrpos(end($level), ".") + 1),
-                    'mod_time' => filemtime($newpath), 'size' => filesize($newpath)
-                );
-            }
+            $files[] = $file;
         }
     }
     closedir($dirlist);
+
+    // Ordena los ficheros alfabéticamente
+    sort($files);
+
+    foreach ($files as $file) {
+        $newpath = $dir . '/' . $file;
+        $level = explode('/', $newpath);
+        if (is_dir($newpath)) {
+            $mod_array[] = array('level' => count($level) - 1, 'path' => $newpath, 'name' =>
+            end($level), 'kind' => 'dir', 'mod_time' => filemtime($newpath), 'content' => $this->recur_dir($newpath));
+        } else {
+            $mod_array[] = array(
+                'level' => count($level) - 1, 'path' => $newpath, 'folder' =>
+                substr($newpath, 0, strrpos($newpath, "/") + 1), 'name' => end($level), 'kind' =>
+                'file', 'extension' => substr(end($level), strrpos(end($level), ".") + 1),
+                'mod_time' => filemtime($newpath), 'size' => filesize($newpath)
+            );
+        }
+    }
     return $mod_array;
 }
+
 
 
 function crea_lyrics($fichero, $texto)
 {
     //BUG: SOLUCIONADO quitando las contrabarras de texto y nombre fichero :? - Falla con los simbolos ingleses ej; can't, men's, etc...
+    /*  DISABLED - Better to use Lyrics Finder to automatic create the txt with the lyrics.
     $fichero = str_replace("\\", "", $fichero);
     $texto = str_replace("\\", "", $texto);
     // just create the txt file if not exists
@@ -440,6 +444,7 @@ function crea_lyrics($fichero, $texto)
             //if (file_exists($fichero))	echo "Archivo ".$fichero." creado";
         }
     }
+    */
 }
 
 
@@ -478,7 +483,8 @@ function processLyrics(){
     //$lyrics = htmlentities($lyrics);//BUG: peta y no sale nada de las letras.
     $lyrics = str_replace("�", "'", $lyrics);
 
-    $lyrics = substr_replace("<h4>" . $lyrics . "</h5>", "</h4><h5>", strpos("<h1>" . $lyrics, "\r\n"), 4);
+    //$lyrics = substr_replace("<h4>" . $lyrics . "</h5>", "</h4><h5>", strpos("<h1>" . $lyrics, "\r\n"), 4); // Disabled for compatibility with lyrics finder automatic .txt lyrics download
+    $lyrics ="<code>" . $lyrics . "</code><br><br><br>";
 
     return $lyrics;
 }
